@@ -1,0 +1,130 @@
+---
+title: "STAT6730 Project"
+subtitle: "Exploring park access data from the Trust for Public Land"
+author: "Polina Berezina, Shan Tang"
+date: "12/10/2021"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(mice)
+library(reshape2)
+library(VIM)
+library(purrr)
+```
+
+## Introduction
+
+
+
+## Data cleaning
+
+Converting 3 variables from string (%) to double (0.-1), year as a factor.
+
+```{r}
+raw <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-06-22/parks.csv')
+str(raw)
+```
+
+```{r}
+#park_pct_city_data
+#pct_near_park_data 
+#spend_per_resident_data
+
+raw$year <- as.factor(raw$year)
+```
+
+
+## Exploratory data analysis
+
+Not interested in the overall year trend in total park points. But observed a recently increasing trend in the Spending per resident and Percent of residents within a 10 minute walk to park
+
+```{r}
+raw %>% 
+  ggplot(aes(x = year, y = total_pct, group = year)) +
+  geom_boxplot() +
+  labs(title="Total park points per year")
+
+raw %>% 
+  ggplot(aes(x = year, y = spend_per_resident_points, group = year)) +
+  geom_boxplot() +
+  labs(title="Spending per resident per year")
+
+raw %>% 
+  ggplot(aes(x = year, y = pct_near_park_points, group = year)) +
+  geom_boxplot() +
+  labs(title="Percent of residents within a 10 minute walk to park per year")
+```
+
+```{r}
+#basic histogram
+d <- melt(raw)
+ggplot(d,aes(x = value)) + 
+    facet_wrap(~variable,scales = "free_x") + 
+    geom_histogram() + # geom_boxplot()
+  theme_classic() +
+  theme(text = element_text(size = 7), axis.text.x = element_text(angle=90)) 
+
+# boxplots per year for every varaible
+ggplot(d) + 
+    facet_wrap(~variable, scales = "free_y") + 
+    geom_boxplot(aes(y=value, x=year, group = year)) +
+  theme_classic() +
+  theme(text = element_text(size = 7), axis.text.x = element_text(angle=90)) 
+```
+
+## Handling missing data
+
+- More than 30% of data is missing in 6 out of 28 variables, including restroom, splashground and park benches counts. We omit these variables from analysis. 
+- Assuming missing at random for others. Impute using mice package with PMM Hot Deck method
+
+```{r, fig.width=6,fig.height=4}
+aggr(raw[,12:28], cex.axis=0.5)
+
+raw <- select(raw, -c(city_dup, park_benches, splashground_points, splashground_data, restroom_points, restroom_data))
+```
+Here, we can use bootstrap/permutation test to find optimal d.
+
+```{r impute}
+raw2 <- select(raw, -c(city, rank)) # everything but city and rank - not useful in imputations
+imp <- mice(raw2, method="pmm", donors=5, print=FALSE) 
+# library(lattice)
+# densityplot(imp)
+df <- complete(imp, 1) # df is the imputed data now
+df <- mutate(df, city = raw$city, rank = raw$rank, .after=1) # append back city and rank vars
+```
+
+## Slide
+
+```{r}
+
+```
+
+## Slide 
+
+```{r}
+
+```
+
+## Slide 
+
+```{r}
+
+```
+
+## Slide 
+
+```{r}
+
+```
+
+## Conclusions
+
+- 1
+- 2
+- 3
+
