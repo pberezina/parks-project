@@ -169,3 +169,9 @@ ggarrange(p1, p2, p3, p4,
 - 1
 - 2
 - 3
+
+
+```{r convert to pdf, include=FALSE, echo=FALSE, warning=FALSE}
+library(xaringanBuilder)
+xaringanBuilder::build_pdf("C:/Users/tang53/Documents/1Course/STAT6730-Comp stat/FINAL/slides_v2.html", complex_slides = TRUE, partial_slides = TRUE)
+```
