@@ -68,11 +68,14 @@ head(raw[,c(1:3,6,8,10)], 1)
 
 ---
 ## Handling missing data
+TODO: fix axis labels too small.
+TODO: include imputation output?
+
 - More than 30% of data is missing in 6 out of 28 variables, including restroom, splashground and park benches counts. We omit these variables from analysis. 
 
 .center[
 ```{r remove, warning = FALSE, message=FALSE, echo=FALSE, fig.width=6,fig.height=4}
-aggr(raw[,12:28], cex.axis=0.7)
+aggr(raw[,12:28], cex.axis=0.5)
 raw <- select(raw, -c(city_dup, park_benches, splashground_points, splashground_data, restroom_points, restroom_data))
 ```
 ]
@@ -96,8 +99,11 @@ TODO: fix titles - cut off. Axis labels too small. Use 2021 colnames as titles?
 TODO: describe what we see? 
 
 #### The distribution of variables
+TODO: increase figure width so that titles are not cut off? 
+TODO: rename varaibles? 
+
 .center[
-```{r explore1, warning = FALSE, message=FALSE, echo=FALSE, fig.width=8,fig.height=6}
+```{r explore1, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=6}
 #basic histogram
 d <- melt(df)
 ggplot(d,aes(x = value)) + 
@@ -112,13 +118,14 @@ ggplot(d,aes(x = value)) +
 #### Variables over the years
 
 TODO: fix titles - cut off. Axis labels too small. Use 2021 colnames as titles?
+TODO: X axis (years) is cut off 
 TODO: maybe color outliers or add any pop of color? 
 TODO: why points e.g. basketball points increase? Answer it on another slide with dplyr or another plot. 
 
-Increasing trend in the Spending per resident and % of residents within a 10 minute walk to park.
+Increasing trend in the `Spending per resident` and `% of residents` within a 10 minute walk to park.
 
 .center[
-```{r explore2, warning = FALSE, message=FALSE, echo=FALSE, fig.width=8,fig.height=6}
+```{r explore2, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=6}
 # boxplots per year for every varaible
 ggplot(d) + 
     facet_wrap(~variable, scales = "free_y") + 
@@ -131,7 +138,7 @@ ggplot(d) +
 ---
 ## Park Point vs. Features 
 
-TODO: what are point1 point2? 
+TODO: add 1 sentence explnation of the figure implications 
 
 .center[
 ```{r, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=7}
@@ -139,25 +146,25 @@ library(ggpubr)
 
 p1<-ggplot(df, aes(x=med_park_size_data, y=med_park_size_points, color=year))+ 
     geom_point(alpha=0.6)+
-    labs(title="Park Size Point1 VS. Park Size", x="Median Park Size (Acres)", y="Points")+
+    labs(title="Size Score 1 VS. Median Park Size", x="Median Park Size (Acres)", y="Score")+
     theme_classic() +
     theme(text = element_text(size = 9))
 
 p2<-ggplot(df, aes(x=park_pct_city_data, y=park_pct_city_points, color=year))+ 
     geom_point(alpha=0.6)+
-    labs(title="Park Size Point2 VS. Park Size", x="Park Size (% city area) ", y="Points")+
+    labs(title="Size Score 2 VS. % Park Size", x="Park Size (% city area) ", y="Score")+
     theme_classic() +
     theme(text = element_text(size = 9))
 
 p3<-ggplot(df, aes(x=pct_near_park_data, y=pct_near_park_points, color=year))+ 
     geom_point(alpha=0.6)+
-    labs(title="Park Access Point VS. Accessibility", x="Residents% within 10-min Walking", y="Points")+
+    labs(title="Access Score VS. Accessibility", x="Residents% within 10-min Walking", y="Score")+
     theme_classic() +
     theme(text = element_text(size = 9))
 
 p4<-ggplot(df, aes(x=spend_per_resident_data, y=spend_per_resident_points, color=year))+ 
     geom_point(alpha=0.6)+
-    labs(title="Park Cost Point VS. Investment", x="Cost per resident ($)", y="Points")+
+    labs(title="Cost Score VS. Investment", x="Cost per resident ($)", y="Score")+
     theme_classic() +
     theme(text = element_text(size = 9))
 
@@ -168,12 +175,19 @@ ggarrange(p1, p2, p3, p4,
 ]
 
 ---
+# Top ranking cities across years
+
+TODO plot example: https://www.google.com/url?sa=i&url=https%3A%2F%2Fstackoverflow.com%2Fquestions%2F10234952%2Fhow-to-use-ggplot-to-group-and-show-top-x-categories&psig=AOvVaw0XZWd0BGshIPlmbKluyRRl&ust=1638905308005000&source=images&cd=vfe&ved=0CAsQjRxqEAoMCBAVAAAAAB0AAAAAEBA 
+Pick 2015 vs. 2020 for years and top10 most populated cities on Y axis? 
+
+---
 ## Exploring equity in 2021
-TODO
+TODO: finish
+
 ```{r}
-original.colnames
 df.2021 <- read.csv('parks_2021.csv')
-df.2021 
+#colnames(df.2021)
+#original.colnames
 ```
 
 
