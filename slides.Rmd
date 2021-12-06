@@ -23,7 +23,7 @@ library(purrr)
 
 ## Data cleaning
 
-Converting 3 variables from string (%) to double (0.-1), year as a factor.
+Converting 3 variables from string (%) to integer (1 -100), year as a factor.
 
 ```{r}
 raw <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-06-22/parks.csv')
@@ -31,6 +31,9 @@ str(raw)
 ```
 
 ```{r}
+# remove $ or %
+# convert % to 0- 100 scale (not 0. - 1)
+#spend_per_resident_data
 #park_pct_city_data
 #pct_near_park_data 
 #spend_per_resident_data
@@ -59,6 +62,7 @@ raw %>%
   geom_boxplot() +
   labs(title="Percent of residents within a 10 minute walk to park per year")
 ```
+## Exploratory data analysis
 
 ```{r}
 #basic histogram
@@ -68,7 +72,10 @@ ggplot(d,aes(x = value)) +
     geom_histogram() + # geom_boxplot()
   theme_classic() +
   theme(text = element_text(size = 7), axis.text.x = element_text(angle=90)) 
+```
+## Exploratory data analysis
 
+```{r}
 # boxplots per year for every varaible
 ggplot(d) + 
     facet_wrap(~variable, scales = "free_y") + 
@@ -77,17 +84,18 @@ ggplot(d) +
   theme(text = element_text(size = 7), axis.text.x = element_text(angle=90)) 
 ```
 
+
 ## Handling missing data
 
 - More than 30% of data is missing in 6 out of 28 variables, including restroom, splashground and park benches counts. We omit these variables from analysis. 
 - Assuming missing at random for others. Impute using mice package with PMM Hot Deck method
 
 ```{r, fig.width=6,fig.height=4}
-aggr(raw[,12:28], cex.axis=0.5)
+aggr(raw[,12:28], cex.axis=0.5, sortVals=TRUE)
 
 raw <- select(raw, -c(city_dup, park_benches, splashground_points, splashground_data, restroom_points, restroom_data))
 ```
-Here, we can use bootstrap/permutation test to find optimal d.
+
 
 ```{r impute}
 raw2 <- select(raw, -c(city, rank)) # everything but city and rank - not useful in imputations
@@ -98,7 +106,9 @@ df <- complete(imp, 1) # df is the imputed data now
 df <- mutate(df, city = raw$city, rank = raw$rank, .after=1) # append back city and rank vars
 ```
 
+
 ## Slide
+
 
 ```{r}
 
