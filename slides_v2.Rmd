@@ -25,31 +25,39 @@ library(xaringan)
 ```
   
 # Introduction
-The Trust for Public Land (TPL) has kept track of green space availability across U.S., using the **ParkScore index** to measures how well cities are meeting their residents’ need for parks based on: 
+The Trust for Public Land (TPL) tracks green space availability across U.S. using the **ParkScore index** to measures how well cities are meeting their residents’ need for public parks based on: 
 - **park access**: residents% walk to park within 10-min walking 
 - **acreage**: median size, parkland% of city area
 - **investment**: spending/resident
 - **amenities**: basketball hoops, dig park, playground, restroom, etc.
+- **equity** distribution of parks according to race and income (2021 only)
 
 ### Questions
-- State trend
-- The relationship between some features and park scores
-- New variables 
+- Yearly trends
+- The relationship between some features and park rankings
+- Affect of adjusting for equity in the newest ranking in 2021
+
+---
+# Map of cities according to their 2020 data
+TODO? 
+
 
 ---
 # Data cleaning
 - Year as a factor
-- Removed % and $ in the data frame, convert these variables from string (%) to double (0.-1)
+- Removed % and $ in the data frame, convert variables from string (%) to double (0-1)
 
 #### Before
+
 ```{r cleaning1, warning = FALSE, message=FALSE, echo=FALSE}
 raw <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-06-22/parks.csv')
-#summary(raw)
-head(raw[,c(1:3,6,8,10)], 1)   ### show the changes that we made
-#str(raw)
 raw$year <- as.factor(raw$year)
+original.colnames <- colnames(raw) # save for the 2021 data used later
+head(raw[,c(1:3,6,8,10)], 1)   ### show the changes that we made
 ```
+
 #### After
+
 ```{r cleaning2, warning = FALSE, message=FALSE, echo=FALSE}
 library(stringr)
 raw$park_pct_city_data<- as.numeric(str_replace_all(raw$park_pct_city_data, "%", ""))
@@ -64,24 +72,28 @@ head(raw[,c(1:3,6,8,10)], 1)
 
 .center[
 ```{r remove, warning = FALSE, message=FALSE, echo=FALSE, fig.width=6,fig.height=4}
-aggr(raw[,12:28], cex.axis=0.5)
+aggr(raw[,12:28], cex.axis=0.7)
 raw <- select(raw, -c(city_dup, park_benches, splashground_points, splashground_data, restroom_points, restroom_data))
 ```
 ]
 
-- Assuming missing at random for others: impute using mice package with PMM Hot Deck method; Here, we can use bootstrap/permutation test to find optimal d.
+- Assuming missing at random for others: impute using mice package with PMM Hot Deck method
 
 ```{r impute, warning = FALSE, message=FALSE, echo=FALSE}
 raw2 <- select(raw, -c(city, rank)) # everything but city and rank - not useful in imputations
 imp <- mice(raw2, method="pmm", donors=5, print=FALSE) 
 # library(lattice)
 # densityplot(imp)
-df <- complete(imp, 1) # df is the imputed data now
+df <- complete(imp, 1)
 df <- mutate(df, city = raw$city, rank = raw$rank, .after=1) # append back city and rank vars
+### df contains imputed, cleaned variables for 2012-2020
 ```
 
 ---
 ## Exploratory data analysis
+
+TODO: fix titles - cut off. Axis labels too small. Use 2021 colnames as titles?
+TODO: describe what we see? 
 
 #### The distribution of variables
 .center[
@@ -97,8 +109,13 @@ ggplot(d,aes(x = value)) +
 ]
 
 ---
-#### The changes of vraibles over years
-Not interested in the overall year trend in total park points. But observed a recently increasing trend in the Spending per resident and Percent of residents within a 10 minute walk to park.
+#### Variables over the years
+
+TODO: fix titles - cut off. Axis labels too small. Use 2021 colnames as titles?
+TODO: maybe color outliers or add any pop of color? 
+TODO: why points e.g. basketball points increase? Answer it on another slide with dplyr or another plot. 
+
+Increasing trend in the Spending per resident and % of residents within a 10 minute walk to park.
 
 .center[
 ```{r explore2, warning = FALSE, message=FALSE, echo=FALSE, fig.width=8,fig.height=6}
@@ -113,6 +130,9 @@ ggplot(d) +
 
 ---
 ## Park Point vs. Features 
+
+TODO: what are point1 point2? 
+
 .center[
 ```{r, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=7}
 library(ggpubr)
@@ -148,30 +168,19 @@ ggarrange(p1, p2, p3, p4,
 ]
 
 ---
-## Slide 
-
+## Exploring equity in 2021
+TODO
 ```{r}
-
+original.colnames
+df.2021 <- read.csv('parks_2021.csv')
+df.2021 
 ```
-
----
-## Slide 
-
-```{r}
-
-```
-
 
 
 ---
 ## Conclusions
-
+TODO
 - 1
 - 2
 - 3
 
-
-```{r convert to pdf, include=FALSE, echo=FALSE, warning=FALSE}
-library(xaringanBuilder)
-xaringanBuilder::build_pdf("C:/Users/tang53/Documents/1Course/STAT6730-Comp stat/FINAL/slides_v2.html", complex_slides = TRUE, partial_slides = TRUE)
-```
