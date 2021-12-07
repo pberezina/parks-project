@@ -46,9 +46,9 @@ TODO?
 # Data cleaning
 - Year as a factor
 - Removed % and $ in the data frame, convert variables from string (%) to double (0-1)
+- rename the column names
 
 #### Before
-
 ```{r cleaning1, warning = FALSE, message=FALSE, echo=FALSE}
 raw <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-06-22/parks.csv')
 raw$year <- as.factor(raw$year)
@@ -57,28 +57,38 @@ head(raw[,c(1:3,6,8,10)], 1)   ### show the changes that we made
 ```
 
 #### After
-
 ```{r cleaning2, warning = FALSE, message=FALSE, echo=FALSE}
 library(stringr)
 raw$park_pct_city_data<- as.numeric(str_replace_all(raw$park_pct_city_data, "%", ""))
 raw$pct_near_park_data<- as.numeric(str_replace_all(raw$pct_near_park_data, "%", ""))
 raw$spend_per_resident_data<- as.numeric(gsub("\\$","",raw$spend_per_resident_data))
+colnames(raw)<-c("year","rank","city","med park size","park size score1","park size pct", "park size score2",
+                 "park access","park access socre","pakr investment","park investment score",
+                 "basketball","basketball score", "dogpark",  "dogpark score", "playground", "playground score",
+                 "rec sr","rec sr socre","restroom", "restroom score" , "splashground",  "splashground score",
+                 "amenities score", "total scores", "total%","city dup","park benches")
 head(raw[,c(1:3,6,8,10)], 1)
 ```
 
 ---
 ## Handling missing data
-TODO: fix axis labels too small.
-TODO: include imputation output?
+```{r, warning = FALSE, message=FALSE, echo=FALSE, }
+##TODO: fix axis labels too small.
+## Tried to solve by renaming the column and reorganizing the presentation slide, not work well
+##TODO: include imputation output?
+```
 
 - More than 30% of data is missing in 6 out of 28 variables, including restroom, splashground and park benches counts. We omit these variables from analysis. 
 
 .center[
-```{r remove, warning = FALSE, message=FALSE, echo=FALSE, fig.width=6,fig.height=4}
-aggr(raw[,12:28], cex.axis=0.5)
-raw <- select(raw, -c(city_dup, park_benches, splashground_points, splashground_data, restroom_points, restroom_data))
+```{r remove, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=6}
+aggr(raw[,12:28], cex.axis=0.8)
+raw <- select(raw, -c("city dup", "park benches", "splashground", "splashground score", "restroom score", "restroom"))
 ```
 ]
+
+---
+## Handling missing data
 
 - Assuming missing at random for others: impute using mice package with PMM Hot Deck method
 
@@ -100,7 +110,6 @@ TODO: describe what we see?
 
 #### The distribution of variables
 TODO: increase figure width so that titles are not cut off? 
-TODO: rename varaibles? 
 
 .center[
 ```{r explore1, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=6}
