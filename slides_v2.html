@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="author" content="Polina Berezina, Shan Tang" />
     <meta name="date" content="2021-12-10" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
   </head>
@@ -30,14 +31,15 @@ The Trust for Public Land (TPL) tracks green space availability across U.S. usin
 - **amenities**: basketball hoops, dig park, playground, restroom, etc.
 - **equity** distribution of parks according to race and income (2021 only)
 
-### Questions
+### We explore
 - Yearly trends
 - The relationship between some features and park rankings/scores
 - Affect of adjusting for equity in the newest ranking in 2021
 
 ---
-# Map of cities according to their 2020 data
-TODO? 
+# Ranking of cities in 2020
+
+![](slides_v2_files/figure-html/map-1.png)&lt;!-- --&gt;
 
 
 ---
@@ -49,8 +51,8 @@ TODO?
 #### Before
 
 ```
-## # A tibble: 1 x 6
-##   year   rank city        park_pct_city_data pct_near_park_data spend_per_resid~
+## # A tibble: 1 × 6
+##   year   rank city        park_pct_city_data pct_near_park_data spend_per_resid…
 ##   &lt;fct&gt; &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;              &lt;chr&gt;              &lt;chr&gt;           
 ## 1 2020      1 Minneapolis 15%                98%                $319
 ```
@@ -58,7 +60,7 @@ TODO?
 #### After
 
 ```
-## # A tibble: 1 x 6
+## # A tibble: 1 × 6
 ##   year   rank city        `park size pct` `park access` `park investment`
 ##   &lt;fct&gt; &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt;         &lt;dbl&gt;             &lt;dbl&gt;
 ## 1 2020      1 Minneapolis              15            98               319
@@ -66,7 +68,6 @@ TODO?
 
 ---
 ## Handling missing data
-
 
 - More than 30% of data is missing in 6 out of 28 variables, including restroom, splashground and park benches counts. We omit these variables from analysis. 
 
@@ -81,11 +82,7 @@ TODO?
 ```r
 raw2 &lt;- select(raw, -c(city, rank)) # everything but city and rank - not useful in imputations
 imp &lt;- mice(raw2, method="pmm", donors=5, print=FALSE) 
-# library(lattice)
-# densityplot(imp)
-df &lt;- complete(imp, 1) %&gt;% 
-  mutate(., city = raw$city, rank = raw$rank, .after=1) # append back city and rank vars
-### df contains imputed, cleaned variables for 2012-2020
+df &lt;- complete(imp, 1) %&gt;% mutate(., city = raw$city, rank = raw$rank, .after=1) # append back city and rank vars
 ```
 
 ---
@@ -110,7 +107,7 @@ Increasing trend in the scores of `park size`, `Spending per resident` and `% of
 ---
 ## Park Scores vs. Features 
 .center[
-![](slides_v2_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+![](slides_v2_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
 ]
 
 - Different max. scores or score weight across years.
@@ -126,7 +123,7 @@ p1&lt;- df %&gt;%
   plot_trend (labsname=c("Basketball Hoops", " ", "Score") )
 ```
 .center[
-![](slides_v2_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+![](slides_v2_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
 ]
 
 - Overall increasing trend in score with better amenities
@@ -135,7 +132,7 @@ p1&lt;- df %&gt;%
 ## Top ranking cities across years
 
 Pick 2015 vs. 2020 for years and top10 most populated cities on Y axis? 
-![](slides_v2_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+![](slides_v2_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
 
 
 ---
@@ -143,18 +140,12 @@ Pick 2015 vs. 2020 for years and top10 most populated cities on Y axis?
 TODO: finish
 
 
-```r
-#df.2021 &lt;- read.csv('parks_2021.csv')
-#colnames(df.2021)
-#original.colnames
-```
 
 
 ---
 ## Summary &amp; Thank you
 - Pay attention to the different scores range/weight across the years
 - Parks tend to have greater score with larger park size, easier accessibility, higher investment and more facilities. 
-- 3
 
 ##### Find this project at GitHub: https://github.com/pberezina/parks-project
     </textarea>

@@ -13,7 +13,9 @@ output:
 ---
 
 ```{r setup, include=FALSE, echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE, dpi=300) # setting global settings
 options(htmltools.dir.version = FALSE) 
+# install.packages(c("ggmap", "tidygeocoder", maps", "mapdata", "VIM", "reshape2", "mice"))
 library(dplyr)
 library(ggplot2)
 library(tidyverse)
@@ -22,6 +24,11 @@ library(reshape2)
 library(VIM)
 library(purrr)
 library(xaringan)
+# for mapping 
+library(ggmap)
+library(tidygeocoder)
+library(maps)
+library(mapdata)
 ```
   
 # Introduction
@@ -32,14 +39,35 @@ The Trust for Public Land (TPL) tracks green space availability across U.S. usin
 - **amenities**: basketball hoops, dig park, playground, restroom, etc.
 - **equity** distribution of parks according to race and income (2021 only)
 
-### Questions
+### We explore
 - Yearly trends
 - The relationship between some features and park rankings/scores
 - Affect of adjusting for equity in the newest ranking in 2021
 
 ---
-# Map of cities according to their 2020 data
-TODO? 
+# Ranking of cities in 2020
+
+```{r map}
+raw <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-06-22/parks.csv')
+
+city_locations <- select(raw, city, rank, year) %>% 
+  filter(year == 2020, !city %in% c('Honolulu', 'Anchorage')) %>% # so that we show contiguous usa only, for 2020 year
+  mutate(address = paste0(city,', USA'))  %>%  # without appending USA, algorithm confuses same-named cities in other countries
+  geocode(address, method = 'osm', lat = lat, long = long) # geocode, or find lat long for each city
+
+usa <- map_data("usa")
+states <- map_data("state")
+
+# geocode cities 
+ggplot() + 
+  geom_polygon(data = states, aes(x = long, y = lat, group = group), color="grey", fill="grey99") +
+  coord_fixed(1.3) +
+  guides(fill=FALSE) +
+  geom_point(data=city_locations, aes(x=long, y=lat), size = 1.4,colour = "black") + 
+  geom_point(data=city_locations, aes(x=long, y=lat,  color=rank), size=1) +
+  scale_colour_gradient2(low ="#fc8d59", mid="#ffffbf", high = "#91cf60", midpoint = 48) +
+  theme_void()
+```
 
 
 ---
@@ -49,16 +77,16 @@ TODO?
 - rename the column names
 
 #### Before
-```{r cleaning1, warning = FALSE, message=FALSE, echo=FALSE}
-raw <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-06-22/parks.csv')
+```{r cleaning1}
 raw$year <- as.factor(raw$year)
 original.colnames <- colnames(raw) # save for the 2021 data used later
 head(raw[,c(1:3,6,8,10)], 1)   ### show the changes that we made
 ```
 
 #### After
-```{r cleaning2, warning = FALSE, message=FALSE, echo=FALSE}
+```{r cleaning2}
 library(stringr)
+# replace with dplyr?
 raw$park_pct_city_data<- as.numeric(str_replace_all(raw$park_pct_city_data, "%", ""))
 raw$pct_near_park_data<- as.numeric(str_replace_all(raw$pct_near_park_data, "%", ""))
 raw$spend_per_resident_data<- as.numeric(gsub("\\$","",raw$spend_per_resident_data))
@@ -74,16 +102,11 @@ head(raw1[,c(1:3,6,8,10)], 1)
 
 ---
 ## Handling missing data
-```{r, warning = FALSE, message=FALSE, echo=FALSE, }
-##TODO: fix axis labels too small.
-## Tried to solve by renaming the column and reorganizing the presentation slide, not work well
-##TODO: include imputation output?
-```
 
 - More than 30% of data is missing in 6 out of 28 variables, including restroom, splashground and park benches counts. We omit these variables from analysis. 
 
 .center[
-```{r remove, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=6}
+```{r remove,fig.width=10,fig.height=6}
 aggr(raw1[,12:28], cex.axis=0.65)
 raw1 <- select(raw1, -c("city dup", "park benches", "splashground", "splashground score", "restroom score", "restroom"))
 ```
@@ -92,14 +115,10 @@ raw1 <- select(raw1, -c("city dup", "park benches", "splashground", "splashgroun
 ---
 ## Handling missing data
 - Assuming missing at random for others: impute using mice package with PMM Hot Deck method
-```{r impute, warning = FALSE, message=FALSE}
+```{r impute, echo=TRUE}
 raw2 <- select(raw, -c(city, rank)) # everything but city and rank - not useful in imputations
 imp <- mice(raw2, method="pmm", donors=5, print=FALSE) 
-# library(lattice)
-# densityplot(imp)
-df <- complete(imp, 1) %>% 
-  mutate(., city = raw$city, rank = raw$rank, .after=1) # append back city and rank vars
-### df contains imputed, cleaned variables for 2012-2020
+df <- complete(imp, 1) %>% mutate(., city = raw$city, rank = raw$rank, .after=1) # append back city and rank vars
 ```
 
 ---
@@ -107,7 +126,7 @@ df <- complete(imp, 1) %>%
 
 #### The distribution of variables
 .center[
-```{r explore1, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=6}
+```{r explore1, fig.width=10,fig.height=6}
 #basic histogram
 df1<-df
 colnames(df1)<-c("year","city","rank","med park size","park size score1","park size pct", "park size score2",
@@ -127,7 +146,7 @@ melt(df1) %>%
 
 ---
 #### Variables over the years
-```{r, include=FALSE, echo=FALSE, warning=FALSE}
+```{r, include=FALSE}
 ##TODO: fix titles - cut off. Axis labels too small. Use 2021 colnames as titles?  >> solved by renaming and figure width adjustment
 ##TODO: X axis (years) is cut off >> solved by figure hight adjustment
 ##TODO: maybe color outliers or add any pop of color? 
@@ -137,7 +156,7 @@ melt(df1) %>%
 Increasing trend in the scores of `park size`, `Spending per resident` and `% of residents within a 10-minute walk to park`.
 
 .center[
-```{r explore2, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=6}
+```{r explore2, fig.width=10,fig.height=6}
 # boxplots per year for every varaible
 melt(df1) %>% 
   ggplot(.) + 
@@ -151,7 +170,7 @@ melt(df1) %>%
 ---
 ## Park Scores vs. Features 
 .center[
-```{r, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=6}
+```{r, fig.width=10,fig.height=6}
 library(ggpubr)
 ##use function to reduce copy and past
 plot_trend<-function(df_sub, labsname){
@@ -193,13 +212,13 @@ ggarrange(p1, p2, p3, p4,
 ---
 ## Park Scores vs. Features
 - Amenities: (number of)basketball hoops, dog parks, playgrounds
-```{r, warning = FALSE, message=FALSE, echo=TRUE}
+```{r, echo=TRUE}
 p1<- df %>% 
   select(basketball_data,basketball_points,year) %>% 
   plot_trend (labsname=c("Basketball Hoops", " ", "Score") )
 ```
 .center[
-```{r, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=4}
+```{r, fig.width=10,fig.height=4}
 p1<- df %>% 
   select(basketball_data,basketball_points,year) %>% 
   plot_trend (labsname=c("Basketball Hoops", " ", "Score") )
@@ -224,7 +243,7 @@ ggarrange(p1, p2, p3,
 ## Top ranking cities across years
 
 Pick 2015 vs. 2020 for years and top10 most populated cities on Y axis? 
-```{r, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=6}
+```{r, fig.width=10,fig.height=6}
 city_name<-union(df$city[df$rank<=10 & df$year==2015], df$city[df$rank<=10 & df$year==2020])  ## city
 city_name<-city_name[city_name %in% c("Arlington, Virginia","Minneapolis","Irvine") ==FALSE]
 ggplot(subset(df, city %in% city_name & year %in% c(2015, 2020)),
@@ -241,7 +260,7 @@ ggplot(subset(df, city %in% city_name & year %in% c(2015, 2020)),
 ## Exploring equity in 2021
 TODO: finish
 
-```{r}
+```{r equity}
 #df.2021 <- read.csv('parks_2021.csv')
 #colnames(df.2021)
 #original.colnames
@@ -252,6 +271,5 @@ TODO: finish
 ## Summary & Thank you
 - Pay attention to the different scores range/weight across the years
 - Parks tend to have greater score with larger park size, easier accessibility, higher investment and more facilities. 
-- 3
 
 ##### Find this project at GitHub: https://github.com/pberezina/parks-project
