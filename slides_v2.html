@@ -39,7 +39,11 @@ The Trust for Public Land (TPL) tracks green space availability across U.S. usin
 ---
 # Ranking of cities in 2020
 
-![](slides_v2_files/figure-html/map-1.png)&lt;!-- --&gt;
+Regional patterns?
+
+&lt;img src="slides_v2_files/figure-html/map-1.png" style="display: block; margin: auto;" /&gt;
+
+
 
 
 ---
@@ -70,20 +74,13 @@ The Trust for Public Land (TPL) tracks green space availability across U.S. usin
 ## Handling missing data
 
 - More than 30% of data is missing in 6 out of 28 variables, including restroom, splashground and park benches counts. We omit these variables from analysis. 
+- Assuming missing at random for others: impute using mice package with PMM Hot Deck method
 
 .center[
 ![](slides_v2_files/figure-html/remove-1.png)&lt;!-- --&gt;
 ]
 
----
-## Handling missing data
-- Assuming missing at random for others: impute using mice package with PMM Hot Deck method
 
-```r
-raw2 &lt;- select(raw, -c(city, rank)) # everything but city and rank - not useful in imputations
-imp &lt;- mice(raw2, method="pmm", donors=5, print=FALSE) 
-df &lt;- complete(imp, 1) %&gt;% mutate(., city = raw$city, rank = raw$rank, .after=1) # append back city and rank vars
-```
 
 ---
 ## Exploratory data analysis
@@ -96,9 +93,7 @@ df &lt;- complete(imp, 1) %&gt;% mutate(., city = raw$city, rank = raw$rank, .af
 
 ---
 #### Variables over the years
-
-
-Increasing trend in the scores of `park size`, `Spending per resident` and `% of residents within a 10-minute walk to park`.
+Increasing trend in `park size`, `park size`, `playground` scores. Why?
 
 .center[
 ![](slides_v2_files/figure-html/explore2-1.png)&lt;!-- --&gt;
@@ -107,11 +102,13 @@ Increasing trend in the scores of `park size`, `Spending per resident` and `% of
 ---
 ## Park Scores vs. Features 
 .center[
-![](slides_v2_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
+![](slides_v2_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
 ]
 
-- Different max. scores or score weight across years.
-- Increasing trend in score with larger park size, easier accessibility and higher investment in parks
+&lt;font size="4"&gt; TPL has different max. scores or feature weight across years.&lt;/font&gt; 
+
+
+&lt;font size="4"&gt;  &lt;span style="color:purple"&gt;2020-21&lt;/span&gt; scores are higher across park size, easier accessibility and investment in parks features.&lt;/font&gt; 
 
 ---
 ## Park Scores vs. Features
@@ -123,22 +120,38 @@ p1&lt;- df %&gt;%
   plot_trend (labsname=c("Basketball Hoops", " ", "Score") )
 ```
 .center[
-![](slides_v2_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+![](slides_v2_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
 ]
 
-- Overall increasing trend in score with better amenities
+- Overall increasing trend in score with better amenities. But plateaus
 
 ---
 ## Top ranking cities across years
 
-Pick 2015 vs. 2020 for years and top10 most populated cities on Y axis? 
-![](slides_v2_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+
+![](slides_v2_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
 
 
 ---
 ## Exploring equity in 2021
-TODO: finish
 
+- TPL added 4 features that go into the new **equity score** : park space ratio and 10-minute walk for low-income and people of color.
+- Again, hard to compare statistics since they changed weighting methods. Visually:
+
+
+```
+##       [,1] [,2]                  [,3]           
+##  [1,] "1"  "Minneapolis"         "Washington"   
+##  [2,] "2"  "Washington, D.C."    "St. Paul"     
+##  [3,] "3"  "St. Paul"            "Minneapolis"  
+##  [4,] "4"  "Arlington, Virginia" "Arlington"    
+##  [5,] "5"  "Cincinnati"          "Chicago"      
+##  [6,] "6"  "Portland"            "San Francisco"
+##  [7,] "7"  "Irvine"              "Irvine"       
+##  [8,] "8"  "San Francisco"       "Cincinnati"   
+##  [9,] "9"  "Boston"              "Seattle"      
+## [10,] "10" "Chicago"             "Portland"
+```
 
 
 
@@ -146,6 +159,7 @@ TODO: finish
 ## Summary &amp; Thank you
 - Pay attention to the different scores range/weight across the years
 - Parks tend to have greater score with larger park size, easier accessibility, higher investment and more facilities. 
+- TPL affected rankings of a lot of cities by including an equity metric in 
 
 ##### Find this project at GitHub: https://github.com/pberezina/parks-project
     </textarea>
