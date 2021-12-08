@@ -34,12 +34,13 @@ The Trust for Public Land (TPL) tracks green space availability across U.S. usin
 
 ### Questions
 - Yearly trends
-- The relationship between some features and park rankings
+- The relationship between some features and park rankings/scores
 - Affect of adjusting for equity in the newest ranking in 2021
 
 ---
 # Map of cities according to their 2020 data
 TODO? 
+
 
 ---
 # Data cleaning
@@ -64,7 +65,7 @@ raw$spend_per_resident_data<- as.numeric(gsub("\\$","",raw$spend_per_resident_da
 
 raw1<-raw
 colnames(raw1)<-c("year","rank","city","med park size","park size score1","park size pct", "park size score2",
-                 "park access","park access socre","pakr investment","park investment score",
+                 "park access","park access socre","park investment","park investment score",
                  "basketball","basketball score", "dogpark",  "dogpark score", "playground", "playground score",
                  "rec sr","rec sr socre","restroom", "restroom score" , "splashground",  "splashground score",
                  "amenities score", "total scores", "total%","city dup","park benches")
@@ -83,7 +84,7 @@ head(raw1[,c(1:3,6,8,10)], 1)
 
 .center[
 ```{r remove, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=6}
-aggr(raw1[,12:28], cex.axis=0.7)
+aggr(raw1[,12:28], cex.axis=0.65)
 raw1 <- select(raw1, -c("city dup", "park benches", "splashground", "splashground score", "restroom score", "restroom"))
 ```
 ]
@@ -96,8 +97,8 @@ raw2 <- select(raw, -c(city, rank)) # everything but city and rank - not useful 
 imp <- mice(raw2, method="pmm", donors=5, print=FALSE) 
 # library(lattice)
 # densityplot(imp)
-df <- complete(imp, 1)
-df <- mutate(df, city = raw$city, rank = raw$rank, .after=1) # append back city and rank vars
+df <- complete(imp, 1) %>% 
+  mutate(., city = raw$city, rank = raw$rank, .after=1) # append back city and rank vars
 ### df contains imputed, cleaned variables for 2012-2020
 ```
 
@@ -108,34 +109,38 @@ df <- mutate(df, city = raw$city, rank = raw$rank, .after=1) # append back city 
 .center[
 ```{r explore1, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=6}
 #basic histogram
-colnames(df)<-c("year","rank","city","med park size","park size score1","park size pct", "park size score2",
-                 "park access","park access socre","pakr investment","park investment score",
+df1<-df
+colnames(df1)<-c("year","city","rank","med park size","park size score1","park size pct", "park size score2",
+                 "park access","park access socre","park investment","park investment score",
                  "basketball","basketball score", "dogpark",  "dogpark score", "playground", "playground score",
                  "rec sr","rec sr socre","restroom", "restroom score" , "splashground",  "splashground score",
                  "amenities score", "total scores", "total%","city dup","park benches")
-d <- melt(df)
-ggplot(d,aes(x = value)) + 
-    facet_wrap(~variable,scales = "free_x") + 
-    geom_histogram() + # geom_boxplot()
-  theme_classic() +
-  theme(strip.text.x = element_text(size = 11), text = element_text(size = 9), axis.text.x = element_text(angle=90)) 
+melt(df1) %>% 
+  ggplot(.,aes(x = value)) +  ##,mapping = aes(value, after_stat(density))
+      facet_wrap(~variable,scales = "free_x") + 
+      geom_histogram() +    #geom_histogram() + # geom_boxplot()  stat_bin(binwidth = h_sturges)
+    theme_classic() +
+    theme(strip.text.x = element_text(size = 11), text = element_text(size = 9), axis.text.x = element_text(angle=90)) 
 ```
 ]
 
+
 ---
 #### Variables over the years
+```{r, include=FALSE, echo=FALSE, warning=FALSE}
+##TODO: fix titles - cut off. Axis labels too small. Use 2021 colnames as titles?  >> solved by renaming and figure width adjustment
+##TODO: X axis (years) is cut off >> solved by figure hight adjustment
+##TODO: maybe color outliers or add any pop of color? 
+##TODO: why points e.g. basketball points increase? Answer it on another slide with dplyr or another plot. >> different max. scores, will answer it inn the scores  vs. features plots
+```
 
-TODO: fix titles - cut off. Axis labels too small. Use 2021 colnames as titles?
-TODO: X axis (years) is cut off 
-TODO: maybe color outliers or add any pop of color? 
-TODO: why points e.g. basketball points increase? Answer it on another slide with dplyr or another plot. 
-
-Increasing trend in the `Spending per resident` and `% of residents` within a 10 minute walk to park.
+Increasing trend in the scores of `park size`, `Spending per resident` and `% of residents within a 10-minute walk to park`.
 
 .center[
 ```{r explore2, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=6}
 # boxplots per year for every varaible
-ggplot(d) + 
+melt(df1) %>% 
+  ggplot(.) + 
     facet_wrap(~variable, scales = "free_y") + 
     geom_boxplot(aes(y=value, x=year, group = year)) +
   theme_classic() +
@@ -144,37 +149,37 @@ ggplot(d) +
 ]
 
 ---
-## Park Point vs. Features 
-
-TODO: add 1 sentence explnation of the figure implications 
-
+## Park Scores vs. Features 
 .center[
-```{r, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=7}
+```{r, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=6}
 library(ggpubr)
-
-p1<-ggplot(df, aes(x=med_park_size_data, y=med_park_size_points, color=year))+ 
+##use function to reduce copy and past
+plot_trend<-function(df_sub, labsname){
+  ##labsname = c(title, xlab, ylab)
+  pp<- ggplot( df_sub, aes_string(x=names(df_sub)[1], y=names(df_sub)[2], color=names(df_sub)[3]) )+ 
     geom_point(alpha=0.6)+
-    labs(title="Size Score 1 VS. Median Park Size", x="Median Park Size (Acres)", y="Score")+
+    labs(title=labsname[1], x=labsname[2], y=labsname[3])+
     theme_classic() +
     theme(text = element_text(size = 9))
+    
+  return(pp)
+}
 
-p2<-ggplot(df, aes(x=park_pct_city_data, y=park_pct_city_points, color=year))+ 
-    geom_point(alpha=0.6)+
-    labs(title="Size Score 2 VS. % Park Size", x="Park Size (% city area) ", y="Score")+
-    theme_classic() +
-    theme(text = element_text(size = 9))
+p1<- df %>% 
+  select(med_park_size_data,med_park_size_points,year) %>% 
+  plot_trend (labsname=c("Size Score 1 VS. Median Park Size", "Median Park Size (Acres)", "Score") )
 
-p3<-ggplot(df, aes(x=pct_near_park_data, y=pct_near_park_points, color=year))+ 
-    geom_point(alpha=0.6)+
-    labs(title="Access Score VS. Accessibility", x="Residents% within 10-min Walking", y="Score")+
-    theme_classic() +
-    theme(text = element_text(size = 9))
-
-p4<-ggplot(df, aes(x=spend_per_resident_data, y=spend_per_resident_points, color=year))+ 
-    geom_point(alpha=0.6)+
-    labs(title="Cost Score VS. Investment", x="Cost per resident ($)", y="Score")+
-    theme_classic() +
-    theme(text = element_text(size = 9))
+p2<-df %>% 
+  select(park_pct_city_data,park_pct_city_points,year) %>% 
+  plot_trend (labsname=c("Size Score 2 VS. % Park Size", "Park Size (% city area) ", "Score") ) 
+  
+p3<- df %>% 
+  select(pct_near_park_data,pct_near_park_points,year) %>% 
+  plot_trend (labsname=c("Access Score VS. Accessibility", "Residents% within 10-min Walking", "Score") )
+  
+p4<- df %>% 
+  select(spend_per_resident_data,spend_per_resident_points,year) %>% 
+  plot_trend (labsname=c("Cost Score VS. Investment", "Cost per resident ($)", "Score") )
 
 ggarrange(p1, p2, p3, p4,
           ncol = 2, nrow = 2,
@@ -182,27 +187,71 @@ ggarrange(p1, p2, p3, p4,
 ```
 ]
 
----
-# Top ranking cities across years
+- Different max. scores or score weight across years.
+- Increasing trend in score with larger park size, easier accessibility and higher investment in parks
 
-TODO plot example: https://www.google.com/url?sa=i&url=https%3A%2F%2Fstackoverflow.com%2Fquestions%2F10234952%2Fhow-to-use-ggplot-to-group-and-show-top-x-categories&psig=AOvVaw0XZWd0BGshIPlmbKluyRRl&ust=1638905308005000&source=images&cd=vfe&ved=0CAsQjRxqEAoMCBAVAAAAAB0AAAAAEBA 
+---
+## Park Scores vs. Features
+- Amenities: (number of)basketball hoops, dog parks, playgrounds
+```{r, warning = FALSE, message=FALSE, echo=TRUE}
+p1<- df %>% 
+  select(basketball_data,basketball_points,year) %>% 
+  plot_trend (labsname=c("Basketball Hoops", " ", "Score") )
+```
+.center[
+```{r, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=4}
+p1<- df %>% 
+  select(basketball_data,basketball_points,year) %>% 
+  plot_trend (labsname=c("Basketball Hoops", " ", "Score") )
+
+p2<-df %>% 
+  select(dogpark_data,dogpark_points,year) %>% 
+  plot_trend (labsname=c("Dog Parks", " ", "Score") ) 
+  
+p3<- df %>% 
+  select(playground_data,playground_points,year) %>% 
+  plot_trend (labsname=c("Playgrounds", " ", "Score") )
+
+ggarrange(p1, p2, p3, 
+          ncol = 3, nrow = 1,
+          common.legend = TRUE, legend="bottom")
+```
+]
+
+- Overall increasing trend in score with better amenities
+
+---
+## Top ranking cities across years
+
 Pick 2015 vs. 2020 for years and top10 most populated cities on Y axis? 
+```{r, warning = FALSE, message=FALSE, echo=FALSE, fig.width=10,fig.height=6}
+city_name<-union(df$city[df$rank<=10 & df$year==2015], df$city[df$rank<=10 & df$year==2020])  ## city
+city_name<-city_name[city_name %in% c("Arlington, Virginia","Minneapolis","Irvine") ==FALSE]
+ggplot(subset(df, city %in% city_name & year %in% c(2015, 2020)),
+       aes(x=rank, y=city)) +
+    geom_point(aes(color=year),size=3.5)+
+    geom_hline(yintercept=c(1:12), linetype="dashed")+
+    labs(x="Park rank", y="City")+
+    theme_classic() +
+    theme(text = element_text(size = 13))
+```
+
 
 ---
 ## Exploring equity in 2021
 TODO: finish
 
 ```{r}
-df.2021 <- read.csv('parks_2021.csv')
+#df.2021 <- read.csv('parks_2021.csv')
 #colnames(df.2021)
 #original.colnames
 ```
 
 
 ---
-## Conclusions
-TODO
-- 1
-- 2
+## Summary & Thank you
+- Pay attention to the different scores range/weight across the years
+- Parks tend to have greater score with larger park size, easier accessibility, higher investment and more facilities. 
 - 3
 
+##### Find this project at GitHub: https://github.com/pberezina/parks-project
