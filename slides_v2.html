@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT6730 Project</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Polina Berezina, Shan Tang" />
+    <meta name="date" content="2021-12-10" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT6730 Project
+## Exploring park access data from the Trust for Public Land
+### Polina Berezina, Shan Tang
+### 12/10/2021
+
+---
+
+
+
+  
+# Introduction
+The Trust for Public Land (TPL) tracks green space availability across U.S. using the **ParkScore index** to measures how well cities are meeting their residents’ need for public parks based on: 
+- **park access**: residents% walk to park within 10-min walking 
+- **acreage**: median size, parkland% of city area
+- **investment**: spending/resident
+- **amenities**: basketball hoops, dig park, playground, restroom, etc.
+- **equity** distribution of parks according to race and income (2021 only)
+
+### Questions
+- Yearly trends
+- The relationship between some features and park rankings/scores
+- Affect of adjusting for equity in the newest ranking in 2021
+
+---
+# Map of cities according to their 2020 data
+TODO? 
+
+
+---
+# Data cleaning
+- Year as a factor
+- Removed % and $ in the data frame, convert variables from string (%) to double (0-1)
+- rename the column names
+
+#### Before
+
+```
+## # A tibble: 1 x 6
+##   year   rank city        park_pct_city_data pct_near_park_data spend_per_resid~
+##   &lt;fct&gt; &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;              &lt;chr&gt;              &lt;chr&gt;           
+## 1 2020      1 Minneapolis 15%                98%                $319
+```
+
+#### After
+
+```
+## # A tibble: 1 x 6
+##   year   rank city        `park size pct` `park access` `park investment`
+##   &lt;fct&gt; &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt;         &lt;dbl&gt;             &lt;dbl&gt;
+## 1 2020      1 Minneapolis              15            98               319
+```
+
+---
+## Handling missing data
+
+
+- More than 30% of data is missing in 6 out of 28 variables, including restroom, splashground and park benches counts. We omit these variables from analysis. 
+
+.center[
+![](slides_v2_files/figure-html/remove-1.png)&lt;!-- --&gt;
+]
+
+---
+## Handling missing data
+- Assuming missing at random for others: impute using mice package with PMM Hot Deck method
+
+```r
+raw2 &lt;- select(raw, -c(city, rank)) # everything but city and rank - not useful in imputations
+imp &lt;- mice(raw2, method="pmm", donors=5, print=FALSE) 
+# library(lattice)
+# densityplot(imp)
+df &lt;- complete(imp, 1) %&gt;% 
+  mutate(., city = raw$city, rank = raw$rank, .after=1) # append back city and rank vars
+### df contains imputed, cleaned variables for 2012-2020
+```
+
+---
+## Exploratory data analysis
+
+#### The distribution of variables
+.center[
+![](slides_v2_files/figure-html/explore1-1.png)&lt;!-- --&gt;
+]
+
+
+---
+#### Variables over the years
+
+
+Increasing trend in the scores of `park size`, `Spending per resident` and `% of residents within a 10-minute walk to park`.
+
+.center[
+![](slides_v2_files/figure-html/explore2-1.png)&lt;!-- --&gt;
+]
+
+---
+## Park Scores vs. Features 
+.center[
+![](slides_v2_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+]
+
+- Different max. scores or score weight across years.
+- Increasing trend in score with larger park size, easier accessibility and higher investment in parks
+
+---
+## Park Scores vs. Features
+- Amenities: (number of)basketball hoops, dog parks, playgrounds
+
+```r
+p1&lt;- df %&gt;% 
+  select(basketball_data,basketball_points,year) %&gt;% 
+  plot_trend (labsname=c("Basketball Hoops", " ", "Score") )
+```
+.center[
+![](slides_v2_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+]
+
+- Overall increasing trend in score with better amenities
+
+---
+## Top ranking cities across years
+
+Pick 2015 vs. 2020 for years and top10 most populated cities on Y axis? 
+![](slides_v2_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+
+
+---
+## Exploring equity in 2021
+TODO: finish
+
+
+```r
+#df.2021 &lt;- read.csv('parks_2021.csv')
+#colnames(df.2021)
+#original.colnames
+```
+
+
+---
+## Summary &amp; Thank you
+- Pay attention to the different scores range/weight across the years
+- Parks tend to have greater score with larger park size, easier accessibility, higher investment and more facilities. 
+- 3
+
+##### Find this project at GitHub: https://github.com/pberezina/parks-project
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
