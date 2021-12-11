@@ -39,9 +39,12 @@ The Trust for Public Land (TPL) tracks green space availability across U.S. usin
 ---
 # Ranking of cities in 2020
 
-Regional patterns?
+Regional patterns 
 
-&lt;img src="slides_v2_files/figure-html/map-1.png" style="display: block; margin: auto;" /&gt;
+
+
+
+&lt;img src="slides_v2_files/figure-html/map2-1.png" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -93,7 +96,8 @@ Regional patterns?
 
 ---
 #### Variables over the years
-Increasing trend in `park size`, `park size`, `playground` scores. Why?
+
+Increasing trend in `park size`, `park access`, `playground` scores
 
 .center[
 ![](slides_v2_files/figure-html/explore2-1.png)&lt;!-- --&gt;
@@ -105,14 +109,11 @@ Increasing trend in `park size`, `park size`, `playground` scores. Why?
 ![](slides_v2_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
 ]
 
-&lt;font size="4"&gt; TPL has different max. scores or feature weight across years.&lt;/font&gt; 
-
-
-&lt;font size="4"&gt;  &lt;span style="color:purple"&gt;2020-21&lt;/span&gt; scores are higher across park size, easier accessibility and investment in parks features.&lt;/font&gt; 
+TPL has different max. scores or feature weight across years. &lt;span style="color:purple"&gt;2020-21&lt;/span&gt; scores are higher across park size, easier accessibility and investment in parks features.
 
 ---
 ## Park Scores vs. Features
-- Amenities: (number of)basketball hoops, dog parks, playgrounds
+- Amenities: (number of) basketball hoops, dog parks, playgrounds
 
 ```r
 p1&lt;- df %&gt;% 
@@ -136,7 +137,7 @@ p1&lt;- df %&gt;%
 ## Exploring equity in 2021
 
 - TPL added 4 features that go into the new **equity score** : park space ratio and 10-minute walk for low-income and people of color.
-- Again, hard to compare statistics since they changed weighting methods. Visually:
+- Hard to directly compare statistics since they changed weighting methods. Visually:
 
 
 ```

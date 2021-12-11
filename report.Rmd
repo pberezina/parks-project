@@ -49,7 +49,7 @@ The Trust for Public Land (TPL) tracks green space availability across U.S. usin
 
 Regional patterns 
 
-```{r map}
+```{r map, fig.align='center', fig.width=10,fig.height=6}
 raw <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-06-22/parks.csv')
 
 city_locations <- select(raw, city, rank, year) %>% 
@@ -62,7 +62,7 @@ states <- map_data("state")
 ```
 
 
-```{r map2, fig.align='center', fig.width=10,fig.height=6}
+```{r}
 mybreaks <- c(1, 25, 50, 75)
 ggplot() + 
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color="grey", fill="grey99") +
