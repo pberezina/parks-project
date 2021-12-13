@@ -25,18 +25,16 @@ library(mapdata)
 ```
   
 ## Introduction
-The Trust for Public Land (TPL) tracks green space availability across U.S. using the **ParkScore index** to measures how well cities are meeting their residents’ need for public parks based on: 
+The Trust for Public Land (TPL) [1] tracks green space availability across U.S. using the proprietary **ParkScore index**. This index measures how well cities are meeting their residents’ need for public parks based on several categories:
 
-- **park access**: residents% walk to park within 10-min walking 
-- **acreage**: median size, parkland% of city area
-- **investment**: spending/resident
-- **amenities**: basketball hoops, dig park, playground, restroom, etc.
-- **equity** distribution of parks according to race and income (2021 only)
+- **access**: percent of residents that live within a 10-minute walking distance, or 0.5 miles, to a public park.
+- **acreage**: median size, percent of parkland within the city area.
+- **investment**: sum of per capita statistic on public, non-profit spendings to manage parklands, volunteer hours. 
+- **amenities**: per capita statistics on the number of basketball hoops, dog parks, playgrounds, restrooms, recreation and senior centers, and splashpads.
+- **equity** (2021 only): average of four metrics. Per capita ratio of nearby park space between neighborhoods of color and white, as well as low-income vs. high-income neighborhoods. Percentage of people of color living within a 10-minute walk to a park and a similar percentage for low-income households.
 
-We explore
-- Yearly trends
-- The relationship between some features and park rankings/scores
-- Affect of adjusting for equity in the newest ranking in 2021
+Each city is awarded up to 100 points based on each one of these categories, and total of the scores is normalized to form an overall ParkScore rating. The data is taken from the Tidy Tuesday project [2]. In this report, we would like conduct exploratory data analysis to explore yearly trends across different categories of ParkScore and how the TPL has changed their methodology. We also explore importance of certain park features to their rankings. Finally, we analyze the newest 2021 data published by TPL to uncover how addition of the equity category to the ParkScore has affected cities' rankings.
+
 
 ```{r}
 raw <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-06-22/parks.csv')
@@ -250,4 +248,8 @@ Parks tend to have greater score with larger park size, easier accessibility, hi
 
 TPL affected rankings of a lot of cities by including an equity metric in 
 
-##### Find this project at GitHub: https://github.com/pberezina/parks-project
+## References
+
+[1] https://www.tpl.org/parkscore
+
+[2] https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-06-22/readme.md
