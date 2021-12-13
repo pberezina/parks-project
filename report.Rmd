@@ -109,7 +109,7 @@ df <- complete(imp, 1) %>% mutate(., city = raw$city, rank = raw$rank, .after=1)
 
 ## Data analysis
 
-Distribution of variables
+#### Exploratory data analysis
 
 ```{r explore1, fig.width=10,fig.height=6}
 #basic histogram
@@ -127,8 +127,7 @@ melt(df1) %>%
     theme(strip.text.x = element_text(size = 11), text = element_text(size = 9), axis.text.x = element_text(angle=90)) 
 ```
 
-
-Variables over the years. Increasing trend in `park size`, `park access`, `playground` scores
+Variables over the years
 
 ```{r explore2, fig.width=10,fig.height=6}
 # boxplots per year for every varaible
@@ -140,7 +139,9 @@ melt(df1) %>%
   theme(strip.text.x = element_text(size = 11),text = element_text(size = 9), axis.text.x = element_text(angle=90)) 
 ```
 
-Park Scores vs. Features. TPL has different max. scores or feature weight across years. <span style="color:purple">2020-21</span> scores are higher across park size, easier accessibility and investment in parks features.
+We investigated the overall variable distribution and the variable distribution over the years from 2012 to 2019. For variable distributions, most variables have an approximately normal distribution with some skewness towards right. Some potential outlines were observed. In the variable distribution over years, we observed a general increasing trend in scores for all attributes. For example, the park size score has an obvious larger number for year 2019 and 2020 compared with previous year. We will explain the reason for the increase in scores in next section.
+
+#### Park Scores vs. Features 
 
 ```{r, fig.width=10,fig.height=6}
 library(ggpubr)
@@ -158,50 +159,32 @@ plot_trend<-function(df_sub, labsname){
 
 p1<- df %>% 
   select(med_park_size_data,med_park_size_points,year) %>% 
-  plot_trend (labsname=c("Size Score 1 VS. Median Park Size", "Median Park Size (Acres)", "Score") )
-
+  plot_trend (labsname=c("Median Park Size", "Median Park Size (Acres)", "Score") )
 p2<-df %>% 
   select(park_pct_city_data,park_pct_city_points,year) %>% 
-  plot_trend (labsname=c("Size Score 2 VS. % Park Size", "Park Size (% city area) ", "Score") ) 
+  plot_trend (labsname=c("% Park Size", "Park Size (% city area) ", "Score") ) 
   
 p3<- df %>% 
   select(pct_near_park_data,pct_near_park_points,year) %>% 
-  plot_trend (labsname=c("Access Score VS. Accessibility", "Residents% within 10-min Walking", "Score") )
+  plot_trend (labsname=c("Accessibility", "Residents% within 10-min Walking", "Score") )
   
 p4<- df %>% 
   select(spend_per_resident_data,spend_per_resident_points,year) %>% 
-  plot_trend (labsname=c("Cost Score VS. Investment", "Cost per resident ($)", "Score") )
+  plot_trend (labsname=c("Investment", "Cost per resident ($)", "Score") )
 
-ggarrange(p1, p2, p3, p4,
-          ncol = 2, nrow = 2,
-          common.legend = TRUE, legend="bottom")
-```
-
-
-Amenities: (number of) basketball hoops, dog parks, playgrounds. Overall increasing trend in score with better amenities. But plateaus
-
-```{r}
-p1<- df %>% 
+p5<- df %>% 
   select(basketball_data,basketball_points,year) %>% 
   plot_trend (labsname=c("Basketball Hoops", " ", "Score") )
-```
-
-
-```{r, fig.width=10,fig.height=4}
-p1<- df %>% 
-  select(basketball_data,basketball_points,year) %>% 
-  plot_trend (labsname=c("Basketball Hoops", " ", "Score") )
-
-p2<-df %>% 
+p6<-df %>% 
   select(dogpark_data,dogpark_points,year) %>% 
   plot_trend (labsname=c("Dog Parks", " ", "Score") ) 
   
-p3<- df %>% 
+p7<- df %>% 
   select(playground_data,playground_points,year) %>% 
   plot_trend (labsname=c("Playgrounds", " ", "Score") )
 
-ggarrange(p1, p2, p3, 
-          ncol = 3, nrow = 1,
+ggarrange(p1, p2, p3, p4,p5,p6,p7,
+          ncol = 4, nrow = 2,
           common.legend = TRUE, legend="bottom")
 ```
 
@@ -220,7 +203,7 @@ ggplot(subset(df, city %in% city_name & year %in% c(2015, 2020)),
     theme(text = element_text(size = 13))
 ```
 
-
+This figure shows the rank change of the top 12 parks from year 2015 to year 2020. Most cities' ranks remained unchanged from year 2015 to year 2020. San Diego had a major drop in park ranking among these cities. When we further look into different score changes for San Diego, the scores for amenities decreased from 2015 to 2020, which is a major reason that caused the rank change. 
 
 #### Exploring equity in 2021
 
