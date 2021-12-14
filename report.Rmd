@@ -173,6 +173,7 @@ ggarrange(p1, p2, p3, p4,p5,p6,p7,
           common.legend = TRUE, legend="bottom")
 ```
 
+By plotting the park score vs. different features that include park size (median park size in acres and percentage of park size in the city), park accessibility (percentage of residents who live close to the park within 10-min walking distance), park investment (the cost for park construction per resident in dollar), and park amenities (basketball hoops, dog parks, playgrounds), an overall positive correlation between park scores and all these features were revealed. It is noticeable that different years might have different score scale for these park features. For example, the scores for park size for year 2019 and 202 range from 0 to 50. The maximum value, 50, is greater than the previous years' max values 20. We need to be aware of these changes of the score range when analyzing these data. Nevertheless, the park scores increase with larger park size, easier accessibility, greater investment and better amenities. Even though it seems obvious that good park systems need adequate acreage, access, investment and services, investigating the relationship between parks scores and specified features can be served as the guide for local park improvement efforts. 
 
 #### Top ranking cities across years
 
@@ -212,7 +213,7 @@ res1 <- df %>% filter(city %in% c('Chicago', 'Portland'), year==2020) %>%
 
 res2 <- df.2021 %>% 
   filter(city %in% c('Chicago', 'Portland'))  %>% 
-  select('med_park_size_points', 'park_pct_city_points', 'pct_near_park_points', 'spend_per_resident_points', 'amenities_points') 
+  select('med_park_size_points', 'park_pct_city_points', 'pct_near_park_points', 'spend_per_resident_points', 'amenities_pints') 
 
 diff <- res2-res1
 rownames(diff) <- c('Chicago', 'Portland')
