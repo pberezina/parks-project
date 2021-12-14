@@ -221,6 +221,13 @@ colnames(diff) <- str_to_title(str_sub(colnames(diff), 1 ,nchar(colnames(diff))-
 kable(diff,caption = 'Difference in scores between 2020 and 2021')
 ```
 
+## Summary
+
+In this project, we investigated the *ParkScore index* data provided by the Trust for Public Land (TPL). Even we failed to find the details about the scoring methodology, TPL claims the ParkScore index as "the national gold-standard comparison of park systems across the 100 most populated cities in the United States"[1,3]. By looking into park access,size/acreage, investment, amenities, and equity, we reached a general rule that park scores increase with larger park size, easier accessibility, greater investment and better amenities. Additionally, adding equity into the scoring system seems to produce little effect on the park ranking. Lastly, we need to pay attention to the different scores range/weight across the years when accessing this dataset. 
+
+We've published this project at GitHub: 
+
+https://github.com/pberezina/parks-project/
 
 
 ## References
@@ -228,3 +235,5 @@ kable(diff,caption = 'Difference in scores between 2020 and 2021')
 [1] https://www.tpl.org/parkscore
 
 [2] https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-06-22/readme.md
+
+[3] https://www.tpl.org/parkscore/about
