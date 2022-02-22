@@ -12,3 +12,5 @@ References:
 2. https://www.tpl.org/parkscore
 3. https://www.tpl.org/parks-and-an-equitable-recovery-parkscore-report#parks-and-equity 
 
+![Map of parks in 2020 with rankings](https://github.com/pberezina/parks-project/blob/main/slides_v2_files/img1.png)
+![Top ranked cities across years](https://github.com/pberezina/parks-project/blob/main/slides_v2_files/img2.png)
